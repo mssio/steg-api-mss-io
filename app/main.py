@@ -1,14 +1,30 @@
 import base64
+import os
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel
 
-app = FastAPI()
+app = FastAPI(
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+    title="steg.api.mss.io"
+)
+
+REQUIRED_API_TOKEN = os.environ.get("API_TOKEN")
+if not REQUIRED_API_TOKEN:
+    raise RuntimeError("API_TOKEN environment variable must be set")
+
+
+def require_api_token(x_api_token: str | None = Header(None, alias="x-api-token")):
+    if not x_api_token or x_api_token != REQUIRED_API_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid or missing x-api-token")
+    return x_api_token
 
 ImageType = Literal["jpeg", "png"]
 
@@ -30,12 +46,12 @@ class ShowRequest(BaseModel):
 
 
 @app.get("/")
-def read_root():
+def read_root(_: str = Depends(require_api_token)):
     return {"system": "steg.api.mss.io"}
 
 
 @app.post("/hide")
-def hide(body: HideRequest):
+def hide(body: HideRequest, _: str = Depends(require_api_token)):
     ext = "png" if body.image_type == "png" else "jpg"
     try:
         image_bytes = base64.b64decode(body.image_base64)
@@ -80,7 +96,7 @@ def hide(body: HideRequest):
         Path(output_path).unlink(missing_ok=True)
 
 @app.post("/show")
-def show(body: ShowRequest):
+def show(body: ShowRequest, _: str = Depends(require_api_token)):
     ext = "png" if body.image_type == "png" else "jpg"
     try:
         image_bytes = base64.b64decode(body.image_base64)

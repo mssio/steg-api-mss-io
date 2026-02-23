@@ -1,0 +1,10 @@
+# Do not bake secrets into the image; pass at runtime (e.g. -e API_TOKEN=...)
+.env
+.env.*
+
+# Virtual env and build artifacts
+.venv
+__pycache__
+*.pyc
+.git
+.gitignore
