@@ -8,3 +8,7 @@ __pycache__
 *.pyc
 .git
 .gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml

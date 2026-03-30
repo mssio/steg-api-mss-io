@@ -1,0 +1,8 @@
+services:
+  vault:
+    image: steg-api-mss-io
+    container_name: steg-api-mss-io
+    ports:
+      - "10000:80"
+    volumes:
+      - .env:/vault/secrets/env.txt

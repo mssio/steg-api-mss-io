@@ -6,6 +6,7 @@ import tempfile
 from pathlib import Path
 from typing import Literal
 
+from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel
 
@@ -16,7 +17,9 @@ app = FastAPI(
     title="steg.api.mss.io"
 )
 
-REQUIRED_API_TOKEN = os.environ.get("API_TOKEN")
+load_dotenv("/vault/secrets/env.txt")
+
+REQUIRED_API_TOKEN = os.getenv("API_TOKEN")
 if not REQUIRED_API_TOKEN:
     raise RuntimeError("API_TOKEN environment variable must be set")
 
